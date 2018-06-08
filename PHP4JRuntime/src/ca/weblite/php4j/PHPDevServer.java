@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.URL;
 import java.net.URLConnection;
@@ -84,13 +85,21 @@ public class PHPDevServer implements AutoCloseable, Runnable {
                     phpExe = new File(phpExe.getParentFile(), "php.exe");
                 }
                 if (!phpExe.exists()) {
+                    phpExe = new File(bundledPhpDir, "php.exe");
+                }
+                if (!phpExe.exists()) {
                     throw new IOException("Bundled PHP executable not found");
                 }
                 phpExe.setExecutable(true);
                 phpPath = phpExe.getAbsolutePath();
                     
             }
-            ProcessBuilder pb = new ProcessBuilder(phpPath, "-S", "0:"+getPort());
+            String hostname = "0";
+            if (PHPLoader.isWindows()) {
+                hostname = InetAddress.getByName(null).getHostAddress();
+            }
+            //System.out.println("Starting server at "+hostname+":"+getPort());
+            ProcessBuilder pb = new ProcessBuilder(phpPath, "-S", hostname+":"+getPort());
             //System.out.println(pb.command());
             pb.directory(getDocumentRoot());
             
@@ -108,16 +117,24 @@ public class PHPDevServer implements AutoCloseable, Runnable {
             boolean success = false;
             while (System.currentTimeMillis() - timeout < startTime) {
                 try {
+                    //System.out.println("Connecting to "+testUrl);
                     HttpURLConnection conn = (HttpURLConnection)testUrl.openConnection();
+                    
+                    conn.setUseCaches(false);
                     int responseCode = conn.getResponseCode();
+                    //System.out.println("Response code "+responseCode);
                     if (responseCode == 200) {
                         success = true;
                         break;
                     }
-                } catch (Throwable t) {}
+                } catch (Throwable t) {
+                    System.out.println(t.getMessage());
+                    //t.printStackTrace();
+                }
             }
             testFile.delete();
             if (!success) {
+               
                 throw new IOException("Failed to start PHP Server");
             }
             synchronized(lock) {
@@ -132,8 +149,17 @@ public class PHPDevServer implements AutoCloseable, Runnable {
         } catch (InterruptedException ex) {
             Logger.getLogger(PHPDevServer.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
+            if (proc != null && proc.isAlive()) {
+                try {
+                    proc.destroyForcibly();
+                } catch (Throwable t){}
+            }
             running = false;
             ended = true;
+            synchronized(lock) {
+                
+                lock.notifyAll();
+            }
         }
         
         

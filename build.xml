@@ -8,6 +8,12 @@
 		<mkdir dir="bin/native"/>
 		<copy file="Php4JBuilder/dist/php4j-macos.zip" todir="bin/native" overwrite="true"/>
 	</target>
+        <target name="release-windows" description="Create Windows Release Zip in bin directory">
+		<ant dir="Php4JBuilder" target="create-windows-zip" useNativeBasedir="true"/>
+		<mkdir dir="bin"/>
+		<mkdir dir="bin/native"/>
+		<copy file="Php4JBuilder/dist/php4j-win.zip" todir="bin/native" overwrite="true"/>
+	</target>
 	
 	<target name="test" description="Run tests">
 		<ant dir="PHP4JRuntime" target="test" useNativeBaseDir="true"/>

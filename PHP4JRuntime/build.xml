@@ -81,7 +81,7 @@
     <target name="install" depends="build-fat-jar">
         <!-- This just installs the native PHP stuff -->
         <echo>Installing php4j native libs</echo>
-        <java jar="dist/PHP4J-fat.jar" fork="true">
+        <java jar="dist/PHP4J-fat.jar" fork="true" failonerror="true">
             <arg value="-install"/>
         </java>
         <echo>Finished install</echo>

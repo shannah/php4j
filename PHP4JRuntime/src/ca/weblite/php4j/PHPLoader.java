@@ -33,21 +33,21 @@ public class PHPLoader {
         }
     }
 
-    private static boolean isWindows() {
+    static boolean isWindows() {
         return (OS.indexOf("win") >= 0);
     }
 
-    private static boolean isMac() {
+    static boolean isMac() {
         return (OS.indexOf("mac") >= 0);
     }
 
-    private static boolean isUnix() {
+    static boolean isUnix() {
         return (OS.indexOf("nux") >= 0);
     }
     
     private String getZipName() {
         if (isWindows()) {
-            return "php4j-windows.zip";
+            return "php4j-win.zip";
         } else if (isMac()) {
             return "php4j-macos.zip";
         } else if (isUnix()){

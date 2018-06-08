@@ -88,5 +88,7 @@
         <echo>Create Zip of Mac Bundle at dist/php4j-macos</echo>
     </target>
     
-    
+    <target name="create-windows-zip" description="Create Windows zip file">
+        <zip destfile="dist/php4j-win.zip" basedir="C:\xampp\php"/>
+    </target>
 </project>
