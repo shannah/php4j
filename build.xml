@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+   
+<project name="php4j-macos" default="default" basedir=".">
+    <description>Builds MacOS native binaries for php4j</description>
+	<target name="release-mac" description="Create Mac Release Zip in bin directory">
+		<ant dir="Php4JBuilder" target="create-mac-zip" useNativeBasedir="true"/>
+		<mkdir dir="bin"/>
+		<mkdir dir="bin/native"/>
+		<copy file="Php4JBuilder/dist/php4j-macos.zip" todir="bin/native" overwrite="true"/>
+	</target>
+	
+	<target name="test" description="Run tests">
+		<ant dir="PHP4JRuntime" target="test" useNativeBaseDir="true"/>
+	</target>  
+</project>

@@ -1,0 +1,90 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package ca.weblite.php4j;
+
+import ca.weblite.php4j.nativeutils.NativeUtils;
+import java.io.File;
+import java.io.IOException;
+
+/**
+ *
+ * @author shannah
+ */
+public class PHPLoader {
+    File php4JDir = new File(
+            new File(System.getProperty("user.home")),
+            ".php4j");
+    
+    
+    private static String OS = System.getProperty("os.name").toLowerCase();
+
+    public static void detectOS() {
+        if (isWindows()) {
+
+        } else if (isMac()) {
+
+        } else if (isUnix()) {
+
+        } else {
+
+        }
+    }
+
+    private static boolean isWindows() {
+        return (OS.indexOf("win") >= 0);
+    }
+
+    private static boolean isMac() {
+        return (OS.indexOf("mac") >= 0);
+    }
+
+    private static boolean isUnix() {
+        return (OS.indexOf("nux") >= 0);
+    }
+    
+    private String getZipName() {
+        if (isWindows()) {
+            return "php4j-windows.zip";
+        } else if (isMac()) {
+            return "php4j-macos.zip";
+        } else if (isUnix()){
+            return "php4j-linux.zip";
+        } else {
+            return "php4j-unknown.zip";
+        }
+    }
+    
+    private String getZipPath() {
+        
+        
+        return "/ca/weblite/php4j/native/" + getZipName();
+    }
+    
+    public File getPHPDir() {
+        return new File(php4JDir, "php");
+    }
+    
+    public File load(boolean forceReload) throws IOException {
+        if (!forceReload && getPHPDir().exists()) {
+            return getPHPDir();
+        }
+        File bundledZip = NativeUtils.loadFileFromJar(getZipPath(), PHPLoader.class);
+        if (bundledZip != null) {
+            if (getPHPDir().exists()) {
+                NativeUtils.delTree(getPHPDir());
+            }
+            getPHPDir().getParentFile().mkdirs();
+            NativeUtils.extractZipTo(bundledZip, getPHPDir());
+            
+        }
+        if (!getPHPDir().exists()) {
+            throw new IOException("No PHP was found bundled");
+        }
+        return getPHPDir();
+    }
+    
+    
+}
