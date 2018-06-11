@@ -6,6 +6,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.lingala.zip4j.core.ZipFile;
@@ -164,5 +167,17 @@ public class NativeUtils {
         }
         return temp;
  
+    }
+    
+    
+    public static String readFileToString(File file, String encoding) throws IOException {
+        return new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
+    }
+
+    public static void writeFileToString(File file, String content, String encoding) throws IOException {
+        try (PrintWriter writer = new PrintWriter(file.getAbsolutePath())){
+            
+            writer.print(content);
+        }
     }
 }

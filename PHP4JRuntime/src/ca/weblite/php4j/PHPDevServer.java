@@ -77,6 +77,7 @@ public class PHPDevServer implements AutoCloseable, Runnable {
                 sock.close();
             }
             String phpPath = getPhpPath();
+            
             if (useBundledPHP) {
                 PHPLoader phpLoader = new PHPLoader();
                 File bundledPhpDir = phpLoader.load(false);
@@ -99,7 +100,24 @@ public class PHPDevServer implements AutoCloseable, Runnable {
                 hostname = InetAddress.getByName(null).getHostAddress();
             }
             //System.out.println("Starting server at "+hostname+":"+getPort());
+            
+            
             ProcessBuilder pb = new ProcessBuilder(phpPath, "-S", hostname+":"+getPort());
+            if (useBundledPHP && PHPLoader.isWindows()) {
+                File phpDir = new File(phpPath).getParentFile();
+                File phpIni = new File(phpDir, "php.ini");
+                if (phpIni.exists()) {
+                    pb.command().add("-c");
+                    pb.command().add(phpDir.getAbsolutePath());
+                } else {
+                    throw new IOException("Could not find php.ini file at "+phpIni.getAbsolutePath());
+                }
+                //pb.environment().put("PATH", new File(new File(phpPath).getParentFile(), "ext").getAbsolutePath()+File.pathSeparator+System.getenv("PATH"));
+                //System.out.println(pb.environment());
+                
+                //pb.command().add("-d");
+                //pb.command().add("extension_dir="+new File(new File(phpPath).getParentFile(), "ext").getAbsolutePath());
+            }
             //System.out.println(pb.command());
             pb.directory(getDocumentRoot());
             

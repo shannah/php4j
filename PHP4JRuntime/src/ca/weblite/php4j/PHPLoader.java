@@ -79,9 +79,18 @@ public class PHPLoader {
             getPHPDir().getParentFile().mkdirs();
             NativeUtils.extractZipTo(bundledZip, getPHPDir());
             
+            
         }
         if (!getPHPDir().exists()) {
             throw new IOException("No PHP was found bundled");
+        }
+        
+        File phpIni = new File(getPHPDir(), "php.ini");
+        if (isWindows()) {
+            String phpIniContents = NativeUtils.readFileToString(phpIni, "UTF-8");
+            
+            phpIniContents = phpIniContents.replace("C:\\xampp\\php", getPHPDir().getAbsolutePath());
+            NativeUtils.writeFileToString(phpIni, phpIniContents, "UTF-8");
         }
         return getPHPDir();
     }
