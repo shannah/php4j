@@ -98,7 +98,7 @@ public class XAMPPMacBuilder {
                     "--prune-empty-dirs", 
                     "--exclude", "xamppfiles/var",
                     "--include", "*/",
-                    
+                    "--include", "xamppfiles/etc/php.ini",
                     "--include", "*.dylib",
                     
                     "--include", "xamppfiles/bin/php*",
@@ -195,6 +195,18 @@ public class XAMPPMacBuilder {
                 throw new IOException(ex);
             }
             
+            pb = new ProcessBuilder("cp",
+                    xamppPath.getAbsolutePath()+"/xamppfiles/etc/php.ini",
+                    destDir.getAbsolutePath()+"/php.ini")
+                    .inheritIO();
+            try {
+                if (pb.start().waitFor() != 0) {
+                    throw new IOException("Failed to copy php.ini");
+                }
+            } catch (InterruptedException ex) {
+                Logger.getLogger(XAMPPMacBuilder.class.getName()).log(Level.SEVERE, null, ex);
+                throw new IOException(ex);
+            }
             
         } finally {
             if (buLocation.exists()) {

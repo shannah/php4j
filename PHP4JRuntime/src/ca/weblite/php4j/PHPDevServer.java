@@ -117,6 +117,15 @@ public class PHPDevServer implements AutoCloseable, Runnable {
                 
                 //pb.command().add("-d");
                 //pb.command().add("extension_dir="+new File(new File(phpPath).getParentFile(), "ext").getAbsolutePath());
+            } else if (useBundledPHP && PHPLoader.isMac()) {
+                File phpDir = new File(phpPath).getParentFile().getParentFile();
+                File phpIni = new File(phpDir, "php.ini");
+                if (phpIni.exists()) {
+                    pb.command().add("-c");
+                    pb.command().add(phpDir.getAbsolutePath());
+                } else {
+                    throw new IOException("Could not find php.ini file at "+phpIni.getAbsolutePath());
+                }
             }
             //System.out.println(pb.command());
             pb.directory(getDocumentRoot());
@@ -146,7 +155,7 @@ public class PHPDevServer implements AutoCloseable, Runnable {
                         break;
                     }
                 } catch (Throwable t) {
-                    System.out.println(t.getMessage());
+                    //System.out.println(t.getMessage());
                     //t.printStackTrace();
                 }
             }
