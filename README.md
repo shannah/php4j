@@ -53,10 +53,12 @@ server.close();
 
 ### Making HTTP Requests
 
+~~~~
 HttpURLConnection conn = (HttpURLConnection)new URL("http://localhost:"+server.getPort()+"/index.php")
 	.openConnection();
 
 String contents = readFromInputStream(conn.openInputStream());
+~~~~
 
 ### Executing PHP Directly
 
