@@ -6,6 +6,7 @@
 package php4jruntime;
 
 import ca.weblite.php4j.PHPDevServer;
+import ca.weblite.php4j.PHPLoader;
 import java.io.File;
 
 /**
@@ -25,12 +26,20 @@ public class PHP4JRuntime {
         }
     }
     
+    public static void uninstall() throws Exception {
+        PHPLoader loader = new PHPLoader();
+        loader.uninstall();
+    }
+    
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) throws Exception {
         if (args.length == 1 && "-install".equals(args[0])) {
             install();
+            return;
+        } else if (args.length == 1 && "-uninstall".equals(args[0])) {
+            uninstall();
             return;
         }
         // TODO code application logic here

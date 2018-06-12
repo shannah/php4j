@@ -76,6 +76,8 @@
         <jar destfile="dist/PHP4J-fat.jar" update="true">
             <zipfileset dir="../bin/native" includes="*" prefix="ca/weblite/php4j/native"/>
         </jar>
+        <copy file="${dist.jar}" tofile="dist/PHP4J-thin.jar"/>
+        
     </target>
     
     <target name="install" depends="build-fat-jar">
@@ -87,8 +89,24 @@
         <echo>Finished install</echo>
     </target>
     
-    <target name="-post-compile-test" depends="install">
-        <!-- Make sure that we install PHP before running tests -->
+    <target name="uninstall" depends="jar">
+        <echo>Uninstallng php4j native libs</echo>
+        <java jar="dist/PHP4JRuntime.jar" fork="true" failonerror="true">
+            <arg value="-uninstall"/>
+        </java>
+    </target>
+    
+    
+    <target name="all-tests" depends="jar" description="Runs all tests.">
+        <echo>Running Tests With Thin Jar</echo>
+        <antcall target="uninstall"/>
+        <antcall target="test"/>
+        <echo>Uninstalling PHP4J native libs</echo>
+        <antcall target="uninstall"/>
+        
+        <echo>Running Tests with Fat Jar</echo>
+        <antcall target="install"/>
+        <antcall target="test"/>
     </target>
     
 </project>

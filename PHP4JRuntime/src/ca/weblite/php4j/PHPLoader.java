@@ -63,6 +63,17 @@ public class PHPLoader {
         return "/ca/weblite/php4j/native/" + getZipName();
     }
     
+    private String getZipUrl() {
+        return "https://github.com/shannah/php4j/blob/master/bin/native/"+getZipName()+"?raw=true";
+    }
+    
+    public void uninstall() throws IOException {
+        if (php4JDir.exists()) {
+            System.out.println("Deleting "+php4JDir);
+            NativeUtils.delTree(php4JDir);
+        }
+    }
+    
     public File getPHPDir() {
         return new File(php4JDir, "php");
     }
@@ -71,38 +82,49 @@ public class PHPLoader {
         if (!forceReload && getPHPDir().exists()) {
             return getPHPDir();
         }
-        File bundledZip = NativeUtils.loadFileFromJar(getZipPath(), PHPLoader.class);
-        if (bundledZip != null) {
-            if (getPHPDir().exists()) {
-                NativeUtils.delTree(getPHPDir());
+        File bundledZip = null;
+        try {
+            bundledZip = NativeUtils.loadFileFromJar(getZipPath(), PHPLoader.class);
+        } catch (IOException ex) {
+            bundledZip = NativeUtils.loadFileFromURL(getZipUrl());
+        }
+        try {
+            if (bundledZip != null) {
+                if (getPHPDir().exists()) {
+                    NativeUtils.delTree(getPHPDir());
+                }
+                getPHPDir().getParentFile().mkdirs();
+                NativeUtils.extractZipTo(bundledZip, getPHPDir());
+
+
             }
-            getPHPDir().getParentFile().mkdirs();
-            NativeUtils.extractZipTo(bundledZip, getPHPDir());
-            
-            
+            if (!getPHPDir().exists()) {
+                throw new IOException("No PHP was found bundled");
+            }
+
+            File phpIni = new File(getPHPDir(), "php.ini");
+            if (isWindows()) {
+                String phpIniContents = NativeUtils.readFileToString(phpIni, "UTF-8");
+
+                phpIniContents = phpIniContents.replace("C:\\xampp\\php", getPHPDir().getAbsolutePath());
+                NativeUtils.writeFileToString(phpIni, phpIniContents, "UTF-8");
+            } else if (isMac()) {
+                String phpIniContents = NativeUtils.readFileToString(phpIni, "UTF-8");
+
+                phpIniContents = phpIniContents.replace("/Applications/XAMPP/xamppfiles", getPHPDir().getAbsolutePath());
+                NativeUtils.writeFileToString(phpIni, phpIniContents, "UTF-8");
+            } else if (isUnix()) {
+                String phpIniContents = NativeUtils.readFileToString(phpIni, "UTF-8");
+
+                phpIniContents = phpIniContents.replace("/opt/lampp", getPHPDir().getAbsolutePath());
+                NativeUtils.writeFileToString(phpIni, phpIniContents, "UTF-8");
+            }
+            return getPHPDir();
+        } finally {
+            if (bundledZip != null && bundledZip.exists()) {
+                bundledZip.delete();
+            }
         }
-        if (!getPHPDir().exists()) {
-            throw new IOException("No PHP was found bundled");
-        }
-        
-        File phpIni = new File(getPHPDir(), "php.ini");
-        if (isWindows()) {
-            String phpIniContents = NativeUtils.readFileToString(phpIni, "UTF-8");
-            
-            phpIniContents = phpIniContents.replace("C:\\xampp\\php", getPHPDir().getAbsolutePath());
-            NativeUtils.writeFileToString(phpIni, phpIniContents, "UTF-8");
-        } else if (isMac()) {
-            String phpIniContents = NativeUtils.readFileToString(phpIni, "UTF-8");
-            
-            phpIniContents = phpIniContents.replace("/Applications/XAMPP/xamppfiles", getPHPDir().getAbsolutePath());
-            NativeUtils.writeFileToString(phpIni, phpIniContents, "UTF-8");
-        } else if (isUnix()) {
-            String phpIniContents = NativeUtils.readFileToString(phpIni, "UTF-8");
-            
-            phpIniContents = phpIniContents.replace("/opt/lampp", getPHPDir().getAbsolutePath());
-            NativeUtils.writeFileToString(phpIni, phpIniContents, "UTF-8");
-        }
-        return getPHPDir();
     }
     
     

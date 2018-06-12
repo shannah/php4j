@@ -7,6 +7,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.logging.Level;
@@ -32,6 +35,8 @@ public class NativeUtils {
     public static void loadLibraryFromJar(String path) throws IOException {
         loadLibraryFromJar(path, NativeUtils.class);
     }
+    
+    
     
     /**
      * Loads library from current JAR archive
@@ -111,6 +116,42 @@ public class NativeUtils {
             }
         }
         return true;
+    }
+    
+    public static void downloadToFile(String url, File file) throws IOException {
+        URL u = new URL(url);
+        URLConnection conn = u.openConnection();
+        if (conn instanceof HttpURLConnection) {
+            HttpURLConnection http = (HttpURLConnection)conn;
+            http.setInstanceFollowRedirects(true);
+            
+            int responseCode = http.getResponseCode();
+            /*
+            String etag = http.getHeaderField("ETag");
+            if (etag != null) {
+                ETags.add(url, etag);
+            }*/
+        }
+        
+        File f = file;
+        try (InputStream input = conn.getInputStream()) {
+            try (FileOutputStream output = new FileOutputStream(f)) {
+                byte[] buf = new byte[128 * 1024];
+                int len;
+                while ((len = input.read(buf)) >= 0) {
+                    output.write(buf, 0, len);
+                }
+            }
+        }
+    }
+    
+    
+    public static File loadFileFromURL(String url) throws IOException {
+        File out = File.createTempFile("tempdownload", ".zip");
+        out.deleteOnExit();
+        downloadToFile(url, out);
+        return out;
+        
     }
     
     public static File loadFileFromJar(String path, Class source) throws IOException {

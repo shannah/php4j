@@ -20,7 +20,12 @@
 		<mkdir dir="bin/native"/>
 		<copy file="Php4JBuilder/dist/php4j-linux.zip" todir="bin/native" overwrite="true"/>
 	</target>
+	<target name="release">
+		<ant dir="PHP4JRuntime" target="build-fat-jar" useNativeBaseDir="true"/>
+		<copy file="PHP4JRuntime/dist/PHP4J-fat.jar" todir="bin" overwrite="true"/>
+		<copy file="PHP4JRuntime/dist/PHP4J-thin.jar" todir="bin" overwrite="true"/>
+	</target>
 	<target name="test" description="Run tests">
-		<ant dir="PHP4JRuntime" target="test" useNativeBaseDir="true"/>
+		<ant dir="PHP4JRuntime" target="all-tests" useNativeBaseDir="true"/>
 	</target>  
 </project>
