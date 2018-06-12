@@ -88,6 +88,20 @@
         <echo>Create Zip of Mac Bundle at dist/php4j-macos</echo>
     </target>
     
+    <target name="build-linux-bundle" depends="jar" description="Create PHP Linux bundle">
+        <!-- Bunding the Linux version of PHP -->
+        <java classname="php4jbuilder.XAMPPLinuxBuilder" 
+              classpath="dist/Php4JBuilder.jar"/>
+        <echo>Created Linux Bundle at dist/php4j-macos</echo>
+    </target>
+    
+    <target name="create-linux-zip" depends="build-linux-bundle" description="Create Linux PHP zip file">
+        <zip destfile="dist/php4j-linux.zip" basedir="dist/php4j-linux">
+            
+        </zip>
+        <echo>Created Zip of Mac Bundle at dist/php4j-macos</echo>
+    </target>
+    
     <target name="create-windows-zip" description="Create Windows zip file">
         <zip destfile="dist/php4j-win.zip" basedir="C:\xampp\php"/>
     </target>

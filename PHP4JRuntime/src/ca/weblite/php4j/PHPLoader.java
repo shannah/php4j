@@ -96,6 +96,11 @@ public class PHPLoader {
             
             phpIniContents = phpIniContents.replace("/Applications/XAMPP/xamppfiles", getPHPDir().getAbsolutePath());
             NativeUtils.writeFileToString(phpIni, phpIniContents, "UTF-8");
+        } else if (isUnix()) {
+            String phpIniContents = NativeUtils.readFileToString(phpIni, "UTF-8");
+            
+            phpIniContents = phpIniContents.replace("/opt/lampp", getPHPDir().getAbsolutePath());
+            NativeUtils.writeFileToString(phpIni, phpIniContents, "UTF-8");
         }
         return getPHPDir();
     }

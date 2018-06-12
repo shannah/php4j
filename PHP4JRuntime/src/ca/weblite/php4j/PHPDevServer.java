@@ -126,6 +126,17 @@ public class PHPDevServer implements AutoCloseable, Runnable {
                 } else {
                     throw new IOException("Could not find php.ini file at "+phpIni.getAbsolutePath());
                 }
+            } else if (useBundledPHP && PHPLoader.isUnix()) {
+                File phpDir = new File(phpPath).getParentFile().getParentFile();
+                File phpIni = new File(phpDir, "php.ini");
+                if (phpIni.exists()) {
+                    pb.command().add("-c");
+                    pb.command().add(phpDir.getAbsolutePath());
+                } else {
+                    throw new IOException("Could not find php.ini file at "+phpIni.getAbsolutePath());
+                }
+                File libDir = new File(phpDir, "lib");
+                pb.environment().put("LD_LIBRARY_PATH", libDir.getAbsolutePath());
             }
             //System.out.println(pb.command());
             pb.directory(getDocumentRoot());
