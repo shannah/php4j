@@ -21,26 +21,93 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
- * @author shannah
+ * A Java wrapper around the PHP build-in web server.
+ * @author Steve Hannah
  */
 public class PHPDevServer implements AutoCloseable, Runnable {
+
+    /**
+     * Gets the install directory where native PHP should be installed.
+     * If null, then the default directory will be used.
+     * @return the installDirectory
+     * @see PHPLoader#getInstallDir() 
+     * @see PHPLoader#setInstallDir(java.io.File) 
+     */
+    public File getInstallDirectory() {
+        return installDirectory;
+    }
+
+    /**
+     * Sets the install directory where native PHP should be installed.
+     * Set this to {@literal null} to just use the default directory.
+     * @param installDirectory the installDirectory to set
+     */
+    public void setInstallDirectory(File installDirectory) {
+        this.installDirectory = installDirectory;
+    }
+    
+    /**
+     * The directory where to install PHP4J
+     */
+    private File installDirectory;
+    
+    /**
+     * The path to the php binary, if not using the bundled version.
+     */
     private String phpPath="php";
+    
+    /**
+     * The port for the php server to listen on.
+     * If this is set to {@literal 0}, it will choose an open port when
+     * {@link #start() } is called, and this port will thereafter be retrievable
+     * via {@link #getPort() }
+     */
     private int port=0;
+    
+    /**
+     * The document root for the PHP server.
+     */
     private File documentRoot = new File(".").getAbsoluteFile();
     
+    /**
+     * The php process
+     */
     private Process proc;
+    
+    /**
+     * The thread that is running the PHP process.
+     */
     private Thread thread;
+    
+    /**
+     * Flag to indicate that the server is running.
+     */
     private boolean running;
+    
+    /**
+     * Flag to indicate that the server was running but is not stopped.
+     */
     private boolean ended;
+    
+    /**
+     * A lock used for synchronizing access to the PHP process and thread.
+     */
     private final Object lock = new Object();
+    
+    /**
+     * Flag to indicate that the server will use the bundled version
+     * of PHP.
+     */
     private boolean useBundledPHP = true;
     
     public PHPDevServer() {
         
     }
     
-    
+    /**
+     * Starts the PHP server.  When this method returns, the server
+     * is finished starting up and is available to receive requests.
+     */
     public void start() {
         thread = new Thread(this);
         thread.start();
@@ -68,7 +135,10 @@ public class PHPDevServer implements AutoCloseable, Runnable {
         }).start();
     }
 
-    
+    /**
+     * Runs the server.  Don't call this method directly.  It is used
+     * internally.  Use {@link #start() } to start the server.
+     */
     public void run() {
         try {
             if (port == 0) {
@@ -80,6 +150,9 @@ public class PHPDevServer implements AutoCloseable, Runnable {
             
             if (useBundledPHP) {
                 PHPLoader phpLoader = new PHPLoader();
+                if (getInstallDirectory() != null) {
+                    phpLoader.setInstallDir(getInstallDirectory());
+                }
                 File bundledPhpDir = phpLoader.load(false);
                 File phpExe = new File(new File(bundledPhpDir, "bin"), "php");
                 if (!phpExe.exists()) {
@@ -203,6 +276,11 @@ public class PHPDevServer implements AutoCloseable, Runnable {
         
     }
     
+    /**
+     * Stops the server.  Satisfies the {@link AutoCloseable} interface
+     * so that you can use inside Java 8 try-with blocks.
+     * @throws Exception 
+     */
     @Override
     public void close() throws Exception {
         System.out.println("Closing test runner");
@@ -211,13 +289,17 @@ public class PHPDevServer implements AutoCloseable, Runnable {
     }
 
     /**
-     * @return the phpPath
+     * Gets the path to the system PHP command.  This is only used if 
+     * {@link #useBundledPHP } is false.
+     * @return the phpPath The path to the PHP command
      */
     public String getPhpPath() {
         return phpPath;
     }
 
     /**
+     * Sets the path to the system PHP command.  This is not used if {@link #useBundledPHP}
+     * is true.
      * @param phpPath the phpPath to set
      */
     public void setPhpPath(String phpPath) {
@@ -225,6 +307,10 @@ public class PHPDevServer implements AutoCloseable, Runnable {
     }
 
     /**
+     * Returns the port that the PHP server is to listen on.  If the server is running,
+     * then this will return the port number that it is listening on. 
+     * 
+     * 
      * @return the port
      */
     public int getPort() {
@@ -232,6 +318,12 @@ public class PHPDevServer implements AutoCloseable, Runnable {
     }
 
     /**
+     * Sets the port that the PHP server should listen on.  After {@link #start() }
+     * has been called, this method will have not effect.
+     * 
+     * <p>Setting the port to {@link 0} before calling {@link #start() } will result
+     * in the PHP server listing on an available port. After the server is started,
+     * {@link #getPort() } will reflect the actual port that the server is listening on.
      * @param port the port to set
      */
     public void setPort(int port) {
@@ -239,6 +331,7 @@ public class PHPDevServer implements AutoCloseable, Runnable {
     }
 
     /**
+     * Gets the document root for the server.
      * @return the documentRoot
      */
     public File getDocumentRoot() {
@@ -246,6 +339,8 @@ public class PHPDevServer implements AutoCloseable, Runnable {
     }
 
     /**
+     * Sets the document root for the server.
+     * This has no effect after server is already started.
      * @param documentRoot the documentRoot to set
      */
     public void setDocumentRoot(File documentRoot) {
@@ -253,6 +348,7 @@ public class PHPDevServer implements AutoCloseable, Runnable {
     }
 
     /**
+     * Checks if the server is running.
      * @return the running
      */
     public boolean isRunning() {
@@ -260,6 +356,7 @@ public class PHPDevServer implements AutoCloseable, Runnable {
     }
 
     /**
+     * Checks if the server is ended.
      * @return the ended
      */
     public boolean isEnded() {
@@ -268,8 +365,8 @@ public class PHPDevServer implements AutoCloseable, Runnable {
     
     /**
      * Executes given PHP code.
-     * @param phpCode
-     * @return
+     * @param phpCode The PHP code to execute.
+     * @return The output as a string (assuming PHP is returning content-type UTF-8)
      * @throws IOException 
      */
     public String executeUTF8(String phpCode) throws IOException {
@@ -284,6 +381,12 @@ public class PHPDevServer implements AutoCloseable, Runnable {
         } 
     }
     
+    /**
+     * Executes PHP code and returns the result.
+     * @param phpCode The PHP code to execute
+     * @return The output as an InputStream.
+     * @throws IOException 
+     */
     public InputStream execute(String phpCode) throws IOException {
         if (!isRunning()) {
             throw new RuntimeException("PHP development server is currently not running");
