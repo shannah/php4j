@@ -105,4 +105,5 @@
     <target name="create-windows-zip" description="Create Windows zip file">
         <zip destfile="dist/php4j-win.zip" basedir="C:\xampp\php"/>
     </target>
+    <target name="default"/>
 </project>
