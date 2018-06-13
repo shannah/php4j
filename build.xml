@@ -27,5 +27,6 @@
 	</target>
 	<target name="test" description="Run tests">
 		<ant dir="PHP4JRuntime" target="all-tests" useNativeBaseDir="true"/>
-	</target>  
+	</target> 
+	<target name="default" depends="release"/> 
 </project>
