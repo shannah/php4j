@@ -4,4 +4,5 @@ os:
   - linux
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install ant          ; fi
+install: true
 script: ant test
