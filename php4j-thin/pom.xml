@@ -2,7 +2,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <properties>
-    <jar.path>../bin/php4j-thin.jar</jar.path>
+    <jar.path>../bin/PHP4J-thin.jar</jar.path>
   </properties>
   <groupId>com.github.shannah.php4j</groupId>
   <artifactId>php4j-thin</artifactId>
